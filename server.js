@@ -1,22 +1,7 @@
 import express from "express";
+import conectarAoBanco from "./src/config/db-config.js";
 
-const posts = [
-  {
-    id: 1,
-    descricao: "Uma foto teste",
-    imagem: "https://placecats.com/millie/300/150",
-  },
-  {
-    id: 2,
-    descricao: "Gato fazendo yoga",
-    imagem: "https://placecats.com/millie/300/150",
-  },
-  {
-    id: 3,
-    descricao: "Gato fazendo panqueca",
-    imagem: "https://placecats.com/millie/300/150",
-  },
-];
+const conexao = await conectarAoBanco(process.env.STRING_CONEXAO);
 
 const app = express();
 
@@ -26,17 +11,24 @@ app.listen(3000, () => {
   console.log("Servidor escutando na porta 3000...");
 });
 
-app.get("/api/posts", (req, res) => {
+async function getTodosPosts() {
+  const db = conexao.db("imersao-instalike");
+  const colecao = db.collection("posts");
+  return colecao.find().toArray();
+}
+
+app.get("/api/posts", async (req, res) => {
+  const posts = await getTodosPosts();
   res.status(200).json(posts);
 });
 
-app.get("/api/posts/:id", (req, res) => {
-  const index = buscarPostPorId(req.params.id);
-  return res.status(200).json(posts[index]);
-});
+// app.get("/api/posts/:id", (req, res) => {
+//   const index = buscarPostPorId(req.params.id);
+//   return res.status(200).json(posts[index]);
+// });
 
-function buscarPostPorId(id) {
-  return posts.findIndex((post) => {
-    return post.id === Number(id);
-  });
-}
+// function buscarPostPorId(id) {
+//   return posts.findIndex((post) => {
+//     return post.id === Number(id);
+//   });
+// }
